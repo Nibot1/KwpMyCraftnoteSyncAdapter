@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27906.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KwpMyCraftnoteProjectSyncAdapter", "KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter.csproj", "{12C36301-7962-469F-BAAC-672A902B856A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{12C36301-7962-469F-BAAC-672A902B856A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12C36301-7962-469F-BAAC-672A902B856A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12C36301-7962-469F-BAAC-672A902B856A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12C36301-7962-469F-BAAC-672A902B856A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {35A5CE67-CC2A-46EB-87B0-FF0D4E35B8E0}
+	EndGlobalSection
+EndGlobal
