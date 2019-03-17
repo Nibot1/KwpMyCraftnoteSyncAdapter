@@ -12,7 +12,6 @@ namespace KwpMyCraftnoteProjectSyncAdapter
 {
     class Program
     {
-        
         static void Main(string[] args)
         {
             string fileName = "config.json";
@@ -25,6 +24,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             int limit = 10;
             string current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
             string apikey = "";
+            List<Project> projects = new List<Project>();
             //check if configfile path is present
             if (args.Length != 0)
             {
@@ -77,30 +77,31 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             builder.InitialCatalog = database;
             //Console.WriteLine(builder.ConnectionString);                
             cnn = new SqlConnection(builder.ConnectionString);
+            SqlCommand queryCommand;
+            SqlDataReader queryReader;
             try
             {
                 //try to open sql connection
                 cnn.Open();
                 Console.WriteLine("connection open");
 
-                var projects = new List<Project> { };
-                
                 // Get All Projects from Database
-                SqlCommand queryCommand;
-                SqlDataReader queryReader;
-                String sql;
+                
 
                 //prepare the sql query
-                sql = "Select * From dbo.Projekt;";
+                
+                queryCommand = new SqlCommand(null, cnn);
+                queryCommand.CommandText = "Select * From dbo.Projekt;";
                 Console.WriteLine(lastSync);
                 Console.WriteLine(current);
                 if (lastSync != "")
                 {
-                    sql = "Select * From dbo.Projekt where ProjAnlage between @lastsync and @now ;";
+                    queryCommand.CommandText = "Select * From dbo.Projekt where ProjAnlage between @lastsync and @now ;";
+                
+                queryCommand.Parameters.Add("@lastsync", SqlDbType.VarChar,lastSync.Length).Value = lastSync;
+                queryCommand.Parameters.Add("@now", SqlDbType.VarChar, current.Length).Value = current;
                 }
-                queryCommand = new SqlCommand(sql, cnn);
-                queryCommand.Parameters.AddWithValue("@lastsync", lastSync);
-                queryCommand.Parameters.AddWithValue("@now", current);
+                queryCommand.Prepare();
                 queryReader = queryCommand.ExecuteReader();
 
                 Console.WriteLine("Reading dbo.Projekt");
@@ -121,17 +122,19 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 queryReader.Close();
 
 
+
                 //Get all Adress Values for all Projects from the Database
                 for (var i = 0; i < projects.Count; i++)
                 {
-                    
-
+                   
                     //prepare the sql query
-                    sql = "Select * From dbo.adrAdressen Where AdrNrGes = '@AdrNrGes';";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@AdrNrGes", projects[i].ProjAdr);
-                    queryReader = queryCommand.ExecuteReader();
+                    
+                    queryCommand = new SqlCommand(null, cnn);
+                    queryCommand.CommandText = "Select * From dbo.adrAdressen Where AdrNrGes = @AdrNrGes;";
+                    queryCommand.Parameters.Add("@AdrNrGes", SqlDbType.VarChar, projects[i].ProjAdr.Length).Value = projects[i].ProjAdr;
+                    queryCommand.Prepare();
 
+                    queryReader = queryCommand.ExecuteReader();
                     Console.WriteLine("Reading dbo.adrAdressen ProjAdr");
                     //start reading response
                     while (queryReader.Read())
@@ -145,10 +148,9 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     //closing reader
                     queryReader.Close();
 
-                    //prepare next sql query
-                    sql = "Select * From dbo.adrAdressen Where AdrNrGes = '@AdrNrGes';";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@AdrNrGes", projects[i].BauHrAdr);
+                    queryCommand.Parameters.Clear();
+                    queryCommand.Parameters.Add("@AdrNrGes", SqlDbType.VarChar, projects[i].BauHrAdr.Length).Value = projects[i].BauHrAdr;
+                    queryCommand.Prepare();
                     queryReader = queryCommand.ExecuteReader();
 
                     Console.WriteLine("Reading dbo.adrAdressen BauHrAdr");
@@ -162,20 +164,22 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                         projects[i].BauHrAdrStrasse = queryReader["Strasse"].ToString();
                         projects[i].BauHrAdrOrtOrtID = (int)queryReader["Ort"];
                     }
-                    //closing reader
                     queryReader.Close();
+                    //closing reader
+                    
+                    
                 }
 
                 //Get all Anrede Values for all Projects from the Database
                 for (var i = 0; i < projects.Count; i++)
                 {
 
-                    //prepare the sql query
-                    sql = "Select * From dbo.adrAnreden Where AnredeID = @AnredeID;";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@AnredeID", projects[i].ProjAdrAnredeID);
+                    //prepare the sql query                  
+                    queryCommand = new SqlCommand(null, cnn);
+                    queryCommand.CommandText = "Select * From dbo.adrAnreden Where AnredeID = @AnredeID;";
+                    queryCommand.Parameters.Add("@AnredeID", SqlDbType.Int, projects[i].ProjAdrAnredeID.ToString().Length).Value = projects[i].ProjAdrAnredeID;
+                    queryCommand.Prepare();
                     queryReader = queryCommand.ExecuteReader();
-
                     Console.WriteLine("Reading dbo.adrAnreden ProjAdrAnrede");
                     //start reading response
                     while (queryReader.Read())
@@ -185,10 +189,10 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     //closing reader
                     queryReader.Close();
 
-                    //prepare the sql query
-                    sql = "Select * From dbo.adrAnreden Where AnredeID = @AnredeID;";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@AnredeID", projects[i].BauHrAdrAnredeID);
+
+                    queryCommand.Parameters.Clear();
+                    queryCommand.Parameters.Add("@AnredeID", SqlDbType.Int, projects[i].BauHrAdrAnredeID.ToString().Length).Value = projects[i].BauHrAdrAnredeID;
+                    queryCommand.Prepare();
                     queryReader = queryCommand.ExecuteReader();
 
                     Console.WriteLine("Reading dbo.adrAnreden ProjAdrAnrede");
@@ -199,18 +203,19 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     }
                     //closing reader
                     queryReader.Close();
+
+
                 }
 
                 //Get all Tel and Email Values for all Projects from the Database
                 for (var i = 0; i < projects.Count; i++)
                 {
                     
-                    //prepare the sql query
-                    sql = "Select * From dbo.adrKontakte Where AdrNrGes = @AdrNrGes;";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@AdrNrGes", projects[i].ProjAdr);
+                    queryCommand = new SqlCommand(null, cnn);
+                    queryCommand.CommandText = "Select * From dbo.adrKontakte Where AdrNrGes = @AdrNrGes;";
+                    queryCommand.Parameters.Add("@AdrNrGes", SqlDbType.VarChar, projects[i].ProjAdr.Length).Value = projects[i].ProjAdr;
+                    queryCommand.Prepare();
                     queryReader = queryCommand.ExecuteReader();
-
                     Console.WriteLine("Reading dbo.adrKontakte ProjAdrEmail and ProjAdrTel");
                     //start reading response
                     while (queryReader.Read())
@@ -228,10 +233,10 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     //closing reader
                     queryReader.Close();
 
-                    //prepare the sql query
-                    sql = "Select * From dbo.adrKontakte Where AdrNrGes = @AdrNrGes;";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@AdrNrGes", projects[i].BauHrAdr);
+
+                    queryCommand.Parameters.Clear();
+                    queryCommand.Parameters.Add("@AdrNrGes", SqlDbType.VarChar, projects[i].ProjAdr.Length).Value = projects[i].ProjAdr;
+                    queryCommand.Prepare();
                     queryReader = queryCommand.ExecuteReader();
 
                     Console.WriteLine("Reading dbo.adrKontakte BauHrAdrEmail and BauHrAdrTel");
@@ -250,16 +255,20 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     }
                     //closing reader
                     queryReader.Close();
+
                 }
 
                 //Get all City Values for all Projects from the Database
                 for (var i = 0; i < projects.Count; i++)
                 {
 
-                    //prepare the sql query
-                   sql = "Select * From dbo.adrOrte Where OrtID = @OrtID;";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@OrtID", projects[i].ProjAdrOrtOrtID);
+                    
+                    
+                    queryCommand = new SqlCommand(null, cnn);
+                    queryCommand.CommandText = "Select * From dbo.adrOrte Where OrtID = @OrtID;";
+
+                    queryCommand.Parameters.Add("@OrtID", SqlDbType.Int, projects[i].ProjAdrOrtOrtID.ToString().Length).Value = projects[i].ProjAdrOrtOrtID;
+                    queryCommand.Prepare();
                     queryReader = queryCommand.ExecuteReader();
 
                     Console.WriteLine("Reading dbo.adrOrte ProjAdrOrt");
@@ -273,10 +282,9 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     //closing reader
                     queryReader.Close();
 
-                    //prepare next sql query
-                   sql = "Select * From dbo.adrOrte Where OrtID = @OrtID;";
-                    queryCommand = new SqlCommand(sql, cnn);
-                    queryCommand.Parameters.AddWithValue("@OrtID", projects[i].BauHrAdrOrtOrtID);
+                    queryCommand.Parameters.Clear();
+                    queryCommand.Parameters.Add("@OrtID", SqlDbType.Int, projects[i].BauHrAdrOrtOrtID.ToString().Length).Value = projects[i].BauHrAdrOrtOrtID;
+                    queryCommand.Prepare();
                     queryReader = queryCommand.ExecuteReader();
 
                     Console.WriteLine("Reading dbo.adrOrte BauHrAdrOrt");
@@ -289,6 +297,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     }
                     //closing reader
                     queryReader.Close();
+
                 }
                 //closing sql connection
                 cnn.Close();
@@ -318,12 +327,11 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 //Print all Project IDs
                 for (var i = 0; i < projects.Count; i++)
                 {
-                    Console.WriteLine("Projekt: " + projects[i].ProjNr+" | "+projects[i].ProjBezeichnung);
-                    //ApiHelper helper = new ApiHelper();
-                    //helper.sendProject(projects[i], apikey);
-                    
+                    Console.WriteLine("Projekt: " + projects[i].ProjNr + " | " + projects[i].ProjBezeichnung);
+                    SendProject(projects[i], apikey);
+
                 }
-                
+
             }
             catch (SqlException e)
             {
@@ -335,7 +343,12 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 Console.WriteLine(e.ToString());
                 Environment.Exit(1);
             }
-            catch(Exception e)
+            catch (NullReferenceException e)
+            {
+                Console.WriteLine(e.ToString());
+                Environment.Exit(1);
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 Environment.Exit(1);
@@ -343,60 +356,30 @@ namespace KwpMyCraftnoteProjectSyncAdapter
 
         }
 
-    }
-    public class Project
-    {
-        public String ProjAnlage { get; set; }
-        public String ProjNr { get; set; }
-        public String ProjBezeichnung { get; set; }
-        public String ProjAdr { get; set; }
-        public String BauHrAdr { get; set; }
-
-        public int ProjAdrAnredeID { get; set; }
-        public String ProjAdrAnrede { get; set; }
-        public String ProjAdrName { get; set; }
-        public String ProjAdrVorname { get; set; }
-        public String ProjAdrStrasse { get; set; }
-        public int ProjAdrOrtOrtID { get; set; }
-        public String ProjAdrOrtLand { get; set; }
-        public String ProjAdrOrtPLZ { get; set; }
-        public String ProjAdrOrtOrt { get; set; }
-        public String ProjAdrTelNr { get; set; }
-        public String ProjAdrEmail { get; set; }
-
-        public int BauHrAdrAnredeID { get; set; }
-        public String BauHrAdrAnrede{ get; set; }
-        public String BauHrAdrName { get; set; }
-        public String BauHrAdrVorname { get; set; }
-        public String BauHrAdrStrasse { get; set; }
-        public int BauHrAdrOrtOrtID { get; set; }
-        public String BauHrAdrOrtLand { get; set; }
-        public String BauHrAdrOrtPLZ { get; set; }
-        public String BauHrAdrOrtOrt { get; set; }
-        public String BauHrAdrTelNr { get; set; }
-        public String BauHrAdrEmail { get; set; }
-    }
-
-    public class ApiHelper
-    {
-        public ApiHelper()
+        private static void SendProject(Project project, string apikey)
         {
-        }
-        public void sendProject(Project project, String apikey)
-        {
+
+            if (project.BauHrAdrTelNr != null)
+            {
+                project.BauHrAdrTelNr = project.BauHrAdrTelNr.Replace("/", "");
+            }
             JObject json = new JObject(
-                new JProperty("name", project.ProjBezeichnung),
-                new JProperty("orderNumber", project.ProjNr),
-                new JProperty("street", project.ProjAdrStrasse),
-                new JProperty("zipcode", project.ProjAdrOrtPLZ,
-                new JProperty("city", project.ProjAdrOrtOrt),
-                new JObject(
+             new JProperty("name", project.ProjBezeichnung),
+             new JProperty("orderNumber", project.ProjNr),
+             new JProperty("street", project.ProjAdrStrasse),
+             new JProperty("zipcode", project.ProjAdrOrtPLZ),
+              new JProperty("city", project.ProjAdrOrtOrt),
+              new JProperty("contact",
+                new JArray(
+                    new JObject(
                     new JProperty("name", project.BauHrAdrAnrede + " " + project.BauHrAdrVorname + " " + project.BauHrAdrName),
                     new JProperty("email", project.BauHrAdrEmail),
-                    new JProperty("phone", project.BauHrAdrTelNr.Replace("/", ""))
+                    new JProperty("phone", project.BauHrAdrTelNr)
                     )
-               ));
-            Console.WriteLine(json.ToString());
+                 )
+             )
+             );
+            //Console.WriteLine(json.ToString());
             /*using (var client = new HttpClient())
             {
                 var response = await client.PostAsync(
@@ -404,6 +387,146 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                      new StringContent(json.ToString(), Encoding.UTF8, "application/json"));
                 Console.WriteLine(response.ToString());
             }*/
+        }
+    }
+    public class Project
+    {
+        public String ProjAnlage
+        {
+            get;
+            set;
+        }
+        public String ProjNr
+        {
+            get;
+            set;
+        }
+        public String ProjBezeichnung
+        {
+            get;
+            set;
+        }
+        public String ProjAdr
+        {
+            get;
+            set;
+        }
+        public String BauHrAdr
+        {
+            get;
+            set;
+        }
+
+        public int ProjAdrAnredeID
+        {
+            get;
+            set;
+        }
+        public String ProjAdrAnrede
+        {
+            get;
+            set;
+        }
+        public String ProjAdrName
+        {
+            get;
+            set;
+        }
+        public String ProjAdrVorname
+        {
+            get;
+            set;
+        }
+        public String ProjAdrStrasse
+        {
+            get;
+            set;
+        }
+        public int ProjAdrOrtOrtID
+        {
+            get;
+            set;
+        }
+        public String ProjAdrOrtLand
+        {
+            get;
+            set;
+        }
+        public String ProjAdrOrtPLZ
+        {
+            get;
+            set;
+        }
+        public String ProjAdrOrtOrt
+        {
+            get;
+            set;
+        }
+        public String ProjAdrTelNr
+        {
+            get;
+            set;
+        }
+        public String ProjAdrEmail
+        {
+            get;
+            set;
+        }
+
+        public int BauHrAdrAnredeID
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrAnrede
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrName
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrVorname
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrStrasse
+        {
+            get;
+            set;
+        }
+        public int BauHrAdrOrtOrtID
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrOrtLand
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrOrtPLZ
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrOrtOrt
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrTelNr
+        {
+            get;
+            set;
+        }
+        public String BauHrAdrEmail
+        {
+            get;
+            set;
         }
     }
 }
