@@ -92,6 +92,44 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 Console.WriteLine("!!!Connection Open!!!");
                 Log("Sql Server Connected");
 
+                /////////////////////////
+                /// Run DB Processing ///
+                /////////////////////////
+                try
+                {
+                    //////////////////////////
+                    /// Reading Configfile ///
+                    //////////////////////////
+                    JObject config = ReadConfigfile(fileName);
+                    Log("Configfile content: " + config.ToString());
+
+
+                    ////////////////////////////////////
+                    /// Read all values from JObject ///
+                    /// and update all values        ///
+                    ////////////////////////////////////
+                    host = (string)config["host"];
+                    username = (string)config["username"];
+                    password = (string)config["password"];
+                    database = (string)config["database"];
+                    database = (string)config["database"];
+                    instance = (string)config["instance"];
+                    lastSync = (string)config["last_sync"];
+                    limit = (int)config["limit"];
+                    interval = (int)config["interval"];
+                    apikey = (string)config["apikey"];
+                }
+                catch (Exception fileError)
+                {
+                    Console.WriteLine("Error while processing the config file. Using fallback values. Please check the Configfile for any issues");
+                    Console.WriteLine(fileError.ToString());
+                    Log("Error in Configfile: " + fileError.ToString());
+                }
+                current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
+                Log("Current timestamp: " + current);
+                ProcessDatabase(lastSync, current, limit, apikey, cnn);
+                UpdateConfigfile(fileName, host, username, password, database, instance, current, limit, apikey);
+
                 ///////////////////////////////////////////////////////////
                 /// Creating a Timer to run this Operations Periodicaly ///
                 //////////////////////////////////////////////////////////
