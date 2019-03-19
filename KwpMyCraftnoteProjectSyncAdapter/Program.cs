@@ -9,11 +9,14 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Windows.Forms;
 using System.Timers;
+using System.Net;
+using System.Diagnostics;
 
 namespace KwpMyCraftnoteProjectSyncAdapter
 {
     class Program
     {
+        private static Version version = Version.Parse("1.0.0.0");
         private static System.Timers.Timer aTimer;
         private static string fileName = "config.json";
         private static string host = "localhost";
@@ -30,6 +33,11 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         private static SqlConnectionStringBuilder builder;
         static void Main(string[] args)
         {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            version = assembly.GetName().Version;
+            CheckUpdate(version);
+
+
 
             //////////////////////////////////////////////////////
             /// Searches commandline args for a Configfilepath ///
@@ -696,7 +704,11 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         }
         private static void Log(string msg)
         {
-            if(new System.IO.FileInfo("log.txt").Length/1000000 >= 1000)
+            if (!File.Exists("log.txt"))
+            {
+                File.WriteAllText("log.txt", string.Empty);
+            }
+            if (new System.IO.FileInfo("log.txt").Length / 1000000 >= 1000)
             {
                 File.WriteAllText("log.txt", string.Empty);
             }
@@ -712,6 +724,55 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             {
                 sw.Close();
             }
+        
+        }
+
+        private static void CheckUpdate(Version version)
+        {
+            try
+            {
+                Console.WriteLine("Prüfe auf aktualisierung");
+                WebClient myWebClient = new WebClient();
+                myWebClient.DownloadFile("https://server01.nibot.me/kwpcarftnote/update.json", "update.json");
+
+                if (File.Exists("update.json") && new FileInfo("update.json").Length != 0)
+                {
+                    /////////////////////////////////////////////////////////////////////////////
+                    /// Open a StreamReader to read the filecontent an parse it to a JObject ///
+                    ///////////////////////////////////////////////////////////////////////////
+                    using (StreamReader r = new StreamReader("update.json"))
+                    {
+                        string json = r.ReadToEnd();
+                        JObject filecontent = JObject.Parse(json);
+                        Log("update.json content: " + filecontent.ToString());
+                        Version newVersion = Version.Parse(filecontent["version"].ToString());
+                        if (version < newVersion)
+                        {
+                            Console.WriteLine("Update avilable");
+                            myWebClient.DownloadFile("https://server01.nibot.me/kwpcarftnote/update.exe", "update.exe");
+                            if (File.Exists("update.exe") && new FileInfo("update.exe").Length != 0)
+                            {
+                                Process.Start("update.exe");
+                                Log("Update started");
+                                System.Environment.Exit(0);
+                            }
+                        }
+                        else
+                        {
+                            Log("Version is not Higher");
+                        }
+                    }
+                }
+            }catch(Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                Log("Update Error: " + e.ToString());
+                MessageBox.Show("Bitte lassen sie Dieses Fenster Geöffnet und informieren sie ihren Systemadministrator \n\n\n" + e.ToString(), "KWP -> MyCraftnote Projekt Synchronisation             Schwerwiegender Fehler!!! ", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                System.Threading.Thread.Sleep(5000);
+                System.Environment.Exit(1);
+            }
+
+
         }
     }
 
@@ -857,4 +918,5 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             set;
         }
     }
+
 }
