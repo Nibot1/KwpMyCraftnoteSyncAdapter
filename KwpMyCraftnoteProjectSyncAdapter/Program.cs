@@ -25,7 +25,6 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         private static string keyword = "craftnote";
         private static JObject config = new JObject();
         private static SqlConnection cnn;
-        private static SqlConnectionStringBuilder builder;
         static void Main(string[] args)
         {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -74,7 +73,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 LogfileHandler.Log("Error in Configfile: " + e.ToString());
             }
 
-            cnn = DatabaseProcessor.BuildConnecion(host, instance, username, password, database);
+            cnn = DatabaseHandler.BuildConnecion(host, instance, username, password, database);
             try
             {
                 ////////////////////////////////////////
@@ -91,10 +90,10 @@ namespace KwpMyCraftnoteProjectSyncAdapter
 
                 current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
                 LogfileHandler.Log("Current timestamp: " + current);
-                List<Models.Project> projects = DatabaseProcessor.GetProjects(cnn, config);
-                //List<Models.Project> serviceProjects = DatabaseProcessor.GetProjects(cnn, config);
+                List<Models.Project> projects = DatabaseHandler.GetProjects(cnn, config);
+                List<Models.Project> serviceProjects = DatabaseHandler.GetServiceProjects(cnn, config);
                 ApiHandler.SendProjects(projects, apikey);
-                //ApiHandler.SendProjects(serviceProjects, apikey);
+                ApiHandler.SendProjects(serviceProjects, apikey);
                 ConfigfileHandler.UpdateConfigfile(fileName, config, current);
 
                 ///////////////////////////////////////////////////////////
@@ -198,10 +197,10 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             }
             current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
             LogfileHandler.Log("Current timestamp: " + current);
-            List<Models.Project> projects = DatabaseProcessor.GetProjects(cnn, config);
-            //List<Models.Project> serviceProjects = DatabaseProcessor.GetProjects(cnn, config);
+            List<Models.Project> projects = DatabaseHandler.GetProjects(cnn, config);
+            List<Models.Project> serviceProjects = DatabaseHandler.GetServiceProjects(cnn, config);
             ApiHandler.SendProjects(projects,apikey);
-            //ApiHandler.SendProjects(serviceProjects,apikey);
+            ApiHandler.SendProjects(serviceProjects,apikey);
             ConfigfileHandler.UpdateConfigfile(fileName, config, current);
         }
 

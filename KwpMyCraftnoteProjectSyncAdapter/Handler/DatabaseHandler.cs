@@ -69,11 +69,11 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 queryCommand.CommandText = "Select * From dbo.Projekt where ProjAnlage between @lastsync and @now ;";
                 queryCommand.Parameters.Add("@lastsync", SqlDbType.VarChar, lastSync.Length).Value = lastSync;
                 queryCommand.Parameters.Add("@now", SqlDbType.VarChar, current.Length).Value = current;
-                Console.WriteLine("Letzte Synchronisation: nie");
+                Console.WriteLine("Letzte Synchronisation: " + lastSync);
             }
             else
             {
-                Console.WriteLine("Letzte Synchronisation: " + lastSync);
+                Console.WriteLine("Letzte Synchronisation: nie");
             }
             Console.WriteLine("Aktuelle Zeit: " + current);
 
@@ -417,25 +417,28 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         /// Try to Read all Projects from the Database ///
         //////////////////////////////////////////////////
         queryCommand = new SqlCommand(null, cnn);
-        queryCommand.CommandText = "Select * From dbo.Projekt;";
+        queryCommand.CommandText = "Select * From dbo.Regie Where Info1 Like @keyword;";
+            queryCommand.Parameters.Add("@keyword", SqlDbType.VarChar, keyword.Length + 2).Value = "%" + keyword + "%";
 
-        /////////////////////////////////////////////////////////////
-        /// Check if There was already an synchronistation or Not ///
-        /////////////////////////////////////////////////////////////
-        if (lastSync != "")
+            /////////////////////////////////////////////////////////////
+            /// Check if There was already an synchronistation or Not ///
+            /////////////////////////////////////////////////////////////
+            if (lastSync != "")
         {
-            /////////////////////////////////////////////////////////////////////
-            /// Updating Sql String to Read Projects only in the Timerange    ///
-            /// between lastsync and current Time to avoid duplicate Projects ///
-            /////////////////////////////////////////////////////////////////////
-            queryCommand.CommandText = "Select * From dbo.Projekt where ProjAnlage between @lastsync and @now ;";
+                /////////////////////////////////////////////////////////////////////
+                /// Updating Sql String to Read Projects only in the Timerange    ///
+                /// between lastsync and current Time to avoid duplicate Projects ///
+                /////////////////////////////////////////////////////////////////////
+                queryCommand.Parameters.Clear();
+            queryCommand.CommandText = "Select * From dbo.Regie where ProjAnlage between @lastsync and @now AND Info1 Like @keyword;";
             queryCommand.Parameters.Add("@lastsync", SqlDbType.VarChar, lastSync.Length).Value = lastSync;
             queryCommand.Parameters.Add("@now", SqlDbType.VarChar, current.Length).Value = current;
-            Console.WriteLine("Letzte Synchronisation: nie");
+                queryCommand.Parameters.Add("@keyword", SqlDbType.VarChar, keyword.Length+2).Value = "%"+keyword+"%";
+                Console.WriteLine("Letzte Synchronisation: "+lastSync);
         }
         else
         {
-            Console.WriteLine("Letzte Synchronisation: " + lastSync);
+            Console.WriteLine("Letzte Synchronisation: nie");
         }
         Console.WriteLine("Aktuelle Zeit: " + current);
 
@@ -445,8 +448,8 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         queryCommand.Prepare();
         queryReader = queryCommand.ExecuteReader();
 
-        Console.WriteLine("Reading dbo.Projekt");
-        LogfileHandler.Log("Reading dbo.Projekt");
+        Console.WriteLine("Reading dbo.Regie");
+        LogfileHandler.Log("Reading dbo.Regie");
         ///////////////////////////////////
         /// Reading Sql Query Response ///
         /////////////////////////////////
