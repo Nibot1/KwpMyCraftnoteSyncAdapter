@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die einer Assembly zugeordnet sind.
 [assembly: AssemblyTitle("KwpMyCraftnoteProjectSyncAdapter")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Programm zum automatischem Übertragen von Projekten der KWP Software zur Handwerker App MyCraftnote")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("KwpMyCraftnoteProjectSyncAdapter")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright ©  2019 Tobin Rosenau")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
