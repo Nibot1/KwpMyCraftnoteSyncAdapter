@@ -976,7 +976,6 @@ namespace KwpMyCraftnoteProjectSyncAdapter
 
         public static Models.ContactPerson GetContactPersonById(SqlConnection cnn, long ansprechpartnerID)
         {
-
             Models.ContactPerson contactPerson = new Models.ContactPerson();
             SqlCommand queryCommand;
             SqlDataReader queryReader;
@@ -985,7 +984,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             /// Try to Read all Projects from the Database ///
             //////////////////////////////////////////////////
             queryCommand = new SqlCommand(null, cnn);
-            queryCommand.CommandText = "Select * From dbo.adrAnsprechpartner Where AnsprechaprtnerID = @id;";
+            queryCommand.CommandText = "Select * From dbo.adrAnsprechpartner Where AnsprechpartnerID = @id;";
             queryCommand.Parameters.Add("@id", SqlDbType.BigInt, ansprechpartnerID.ToString().Length).Value = ansprechpartnerID;
 
             //////////////////////////////////////////////
@@ -1015,7 +1014,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             /// Try to Read all Projects from the Database ///
             //////////////////////////////////////////////////
             queryCommand = new SqlCommand(null, cnn);
-            queryCommand.CommandText = "Select * From dbo.adrKontakte Where AnsprechaprtnerID = @id;";
+            queryCommand.CommandText = "Select * From dbo.adrKontakte Where AnsprechpartnerID = @id;";
             queryCommand.Parameters.Add("@id", SqlDbType.BigInt, ansprechpartnerID.ToString().Length).Value = ansprechpartnerID;
 
             //////////////////////////////////////////////
@@ -1031,7 +1030,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             /////////////////////////////////
             while (queryReader.Read())
             {
-                if ((int)queryReader["KontaktArtTyp"] == 1)
+                if ((Int16)queryReader["KontaktArtTyp"] == (Int16)1)
                 {
                     switch ((int)queryReader["KontaktArt"])
                     {
@@ -1055,7 +1054,8 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                             break;
 
                     }
-                }else if((int)queryReader["KontaktArtTyp"] == 1)
+                }
+                else if ((Int16)queryReader["KontaktArtTyp"] == (Int16)0)
                 {
                     switch ((int)queryReader["KontaktArt"])
                     {

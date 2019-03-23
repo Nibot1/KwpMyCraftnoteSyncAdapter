@@ -84,17 +84,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 Console.WriteLine("!!!Connection Open!!!");
                 LogfileHandler.Log("Sql Server Connected");
 
-                /////////////////////////
-                /// Run DB Processing ///
-                /////////////////////////
-
-                current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
-                LogfileHandler.Log("Current timestamp: " + current);
-                List<Models.Project> projects = DatabaseHandler.GetProjects(cnn, config);
-                List<Models.Project> serviceProjects = DatabaseHandler.GetServiceProjects(cnn, config);
-                ApiHandler.SendProjects(projects, apikey);
-                ApiHandler.SendProjects(serviceProjects, apikey);
-                ConfigfileHandler.UpdateConfigfile(fileName, config, current);
+                runDBProcessing();
 
                 ///////////////////////////////////////////////////////////
                 /// Creating a Timer to run this Operations Periodicaly ///
@@ -164,6 +154,11 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             LogfileHandler.Log("Timer run");
+            runDBProcessing();                
+        }
+
+        public static void runDBProcessing()
+        {
             try
             {
                 //////////////////////////
@@ -201,7 +196,8 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             List<Models.Project> serviceProjects = DatabaseHandler.GetServiceProjects(cnn, config);
             for (var i = 0; i < projects.Count; i++)
             {
-                if (projects[i].ProjAdrAnsprechpartnerID != (long)-1) {
+                if (projects[i].ProjAdrAnsprechpartnerID != (long)-1)
+                {
                     projects[i].ProjectAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, projects[i].ProjAdrAnsprechpartnerID);
                 }
                 if (projects[i].BauHrAdrAnsprechpartnerID != (long)-1)
@@ -213,7 +209,8 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     projects[i].RechAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, projects[i].ProjAdrAnsprechpartnerID);
                 }
             }
-            ApiHandler.SendProjects(projects,apikey);
+            ApiHandler.SendProjects(projects, apikey);
+
             for (var i = 0; i < serviceProjects.Count; i++)
             {
                 if (serviceProjects[i].ProjAdrAnsprechpartnerID != (long)-1)
@@ -229,12 +226,8 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                     serviceProjects[i].RechAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, serviceProjects[i].ProjAdrAnsprechpartnerID);
                 }
             }
-            ApiHandler.SendProjects(serviceProjects,apikey);
+            ApiHandler.SendProjects(serviceProjects, apikey);
             ConfigfileHandler.UpdateConfigfile(fileName, config, current);
         }
-
-
-
-
     }
 }
