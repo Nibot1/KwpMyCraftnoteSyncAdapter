@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -94,11 +95,13 @@ namespace KwpMyCraftnoteProjectSyncAdapter.Models
             get;
             set;
         }
-        public int ProjAdrAnsprechpartnerID
+        public long ProjAdrAnsprechpartnerID
         {
             get;
             set;
         }
+
+        public ContactPerson ProjectAdrAnsprechpartner { get; set; }
 
         public int BauHrAdrAnredeID
         {
@@ -155,11 +158,13 @@ namespace KwpMyCraftnoteProjectSyncAdapter.Models
             get;
             set;
         }
-        public int BauHrAdrAnsprechpartnerID
+        public long BauHrAdrAnsprechpartnerID
         {
             get;
             set;
         }
+
+        public ContactPerson BauHrAdrAnsprechpartner { get; set; }
 
         public int RechAdrAnredeID
         {
@@ -216,10 +221,11 @@ namespace KwpMyCraftnoteProjectSyncAdapter.Models
             get;
             set;
         }
-        public int RechAdrAnsprechpartnerID
+        public long RechAdrAnsprechpartnerID
         {
             get;
             set;
         }
+        public ContactPerson RechAdrAnsprechpartner { get; set; }
     }
 }

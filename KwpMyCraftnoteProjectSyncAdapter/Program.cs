@@ -199,7 +199,36 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             LogfileHandler.Log("Current timestamp: " + current);
             List<Models.Project> projects = DatabaseHandler.GetProjects(cnn, config);
             List<Models.Project> serviceProjects = DatabaseHandler.GetServiceProjects(cnn, config);
+            for (var i = 0; i < projects.Count; i++)
+            {
+                if (projects[i].ProjAdrAnsprechpartnerID != (long)-1) {
+                    projects[i].ProjectAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, projects[i].ProjAdrAnsprechpartnerID);
+                }
+                if (projects[i].BauHrAdrAnsprechpartnerID != (long)-1)
+                {
+                    projects[i].BauHrAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, projects[i].BauHrAdrAnsprechpartnerID);
+                }
+                if (projects[i].RechAdrAnsprechpartnerID != (long)-1)
+                {
+                    projects[i].RechAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, projects[i].ProjAdrAnsprechpartnerID);
+                }
+            }
             ApiHandler.SendProjects(projects,apikey);
+            for (var i = 0; i < serviceProjects.Count; i++)
+            {
+                if (serviceProjects[i].ProjAdrAnsprechpartnerID != (long)-1)
+                {
+                    serviceProjects[i].ProjectAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, serviceProjects[i].ProjAdrAnsprechpartnerID);
+                }
+                if (serviceProjects[i].BauHrAdrAnsprechpartnerID != (long)-1)
+                {
+                    serviceProjects[i].BauHrAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, serviceProjects[i].BauHrAdrAnsprechpartnerID);
+                }
+                if (serviceProjects[i].RechAdrAnsprechpartnerID != (long)-1)
+                {
+                    serviceProjects[i].RechAdrAnsprechpartner = DatabaseHandler.GetContactPersonById(cnn, serviceProjects[i].ProjAdrAnsprechpartnerID);
+                }
+            }
             ApiHandler.SendProjects(serviceProjects,apikey);
             ConfigfileHandler.UpdateConfigfile(fileName, config, current);
         }

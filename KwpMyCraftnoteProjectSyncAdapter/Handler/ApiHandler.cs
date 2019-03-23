@@ -28,22 +28,127 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 ///////////////////////////////////////////////
                 if (projects[i].ProjBezeichnung.Length != 0)
                 {
+                    JArray contactPersons = new JArray();
+                    if (projects[i].ProjAdr != projects[i].BauHrAdr)
+                    {
+                        contactPersons.Add(new JObject(
+                             new JProperty("name", projects[i].ProjAdrAnrede + " " + projects[i].ProjAdrVorname + " " + projects[i].ProjAdrName),
+                             new JProperty("email", projects[i].ProjAdrEmail),
+                             new JProperty("phone", projects[i].ProjAdrTelNr)
+                            ));
+
+                        if (projects[i].BauHrAdr != projects[i].RechAdr)
+                        {
+                            contactPersons.Add(new JObject(
+                        new JProperty("name", projects[i].BauHrAdrAnrede + " " + projects[i].BauHrAdrVorname + " " + projects[i].BauHrAdrName),
+                        new JProperty("email", projects[i].BauHrAdrEmail),
+                        new JProperty("phone", projects[i].BauHrAdrTelNr)
+                       ));
+                            contactPersons.Add(new JObject(
+                        new JProperty("name", projects[i].RechAdrAnrede + " " + projects[i].RechAdrVorname + " " + projects[i].RechAdrName),
+                        new JProperty("email", projects[i].RechAdrEmail),
+                        new JProperty("phone", projects[i].RechAdrTelNr)
+                       ));
+                        }
+                        else
+                        {
+                            contactPersons.Add(new JObject(
+                        new JProperty("name", projects[i].BauHrAdrAnrede + " " + projects[i].BauHrAdrVorname + " " + projects[i].BauHrAdrName),
+                        new JProperty("email", projects[i].BauHrAdrEmail),
+                        new JProperty("phone", projects[i].BauHrAdrTelNr)
+                       ));
+                        }
+                    }
+                    else
+                    {
+                        contactPersons.Add(new JObject(
+                             new JProperty("name", projects[i].ProjAdrAnrede + " " + projects[i].ProjAdrVorname + " " + projects[i].ProjAdrName),
+                             new JProperty("email", projects[i].ProjAdrEmail),
+                             new JProperty("phone", projects[i].ProjAdrTelNr)
+                            ));
+                    }
+                    if (projects[i].ProjectAdrAnsprechpartner != null)
+                    {
+                        if (projects[i].ProjAdr != projects[i].BauHrAdr)
+                        {
+                            contactPersons.Add(new JObject(
+                        new JProperty("name", projects[i].ProjectAdrAnsprechpartner.Anrede + " " + projects[i].ProjectAdrAnsprechpartner.Vorname + " " + projects[i].ProjectAdrAnsprechpartner.Nachname),
+                        new JProperty("email", projects[i].ProjectAdrAnsprechpartner.Email),
+                        new JProperty("phone", projects[i].ProjectAdrAnsprechpartner.Telefonnummer)));
+                            if (projects[i].ProjectAdrAnsprechpartner.TelefonnummerPrivat != "" || projects[i].ProjectAdrAnsprechpartner.EmailPrivat != "")
+                            {
+                                contactPersons.Add(new JObject(
+                                new JProperty("name", projects[i].ProjectAdrAnsprechpartner.Anrede + " " + projects[i].ProjectAdrAnsprechpartner.Vorname + " " + projects[i].ProjectAdrAnsprechpartner.Nachname + "(Privat)"),
+                                new JProperty("email", projects[i].ProjectAdrAnsprechpartner.EmailPrivat),
+                                new JProperty("phone", projects[i].ProjectAdrAnsprechpartner.TelefonnummerPrivat)));
+                            }
+                        }
+                        if (projects[i].BauHrAdr != projects[i].RechAdr)
+                        {
+                            if (projects[i].BauHrAdrAnsprechpartner != null)
+                            {
+                                contactPersons.Add(new JObject(
+                                new JProperty("name", projects[i].BauHrAdrAnsprechpartner.Anrede + " " + projects[i].BauHrAdrAnsprechpartner.Vorname + " " + projects[i].BauHrAdrAnsprechpartner.Nachname),
+                                new JProperty("email", projects[i].BauHrAdrAnsprechpartner.Email),
+                                new JProperty("phone", projects[i].BauHrAdrAnsprechpartner.Telefonnummer)));
+                                if (projects[i].BauHrAdrAnsprechpartner.TelefonnummerPrivat != "" || projects[i].BauHrAdrAnsprechpartner.EmailPrivat != "")
+                                {
+                                    contactPersons.Add(new JObject(
+                                    new JProperty("name", projects[i].BauHrAdrAnsprechpartner.Anrede + " " + projects[i].BauHrAdrAnsprechpartner.Vorname + " " + projects[i].BauHrAdrAnsprechpartner.Nachname + "(Privat)"),
+                                    new JProperty("email", projects[i].BauHrAdrAnsprechpartner.EmailPrivat),
+                                    new JProperty("phone", projects[i].BauHrAdrAnsprechpartner.TelefonnummerPrivat)));
+                                }
+                            }
+                            if (projects[i].RechAdrAnsprechpartner != null)
+                            {
+                                contactPersons.Add(new JObject(
+                                new JProperty("name", projects[i].RechAdrAnsprechpartner.Anrede + " " + projects[i].RechAdrAnsprechpartner.Vorname + " " + projects[i].RechAdrAnsprechpartner.Nachname),
+                                new JProperty("email", projects[i].RechAdrAnsprechpartner.Email),
+                                new JProperty("phone", projects[i].RechAdrAnsprechpartner.Telefonnummer)));
+                                if (projects[i].RechAdrAnsprechpartner.TelefonnummerPrivat != "" || projects[i].RechAdrAnsprechpartner.EmailPrivat != "")
+                                {
+                                    contactPersons.Add(new JObject(
+                                    new JProperty("name", projects[i].RechAdrAnsprechpartner.Anrede + " " + projects[i].RechAdrAnsprechpartner.Vorname + " " + projects[i].RechAdrAnsprechpartner.Nachname + "(Privat)"),
+                                    new JProperty("email", projects[i].RechAdrAnsprechpartner.EmailPrivat),
+                                    new JProperty("phone", projects[i].RechAdrAnsprechpartner.TelefonnummerPrivat)));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (projects[i].BauHrAdrAnsprechpartner != null)
+                            {
+                                contactPersons.Add(new JObject(
+                                new JProperty("name", projects[i].BauHrAdrAnsprechpartner.Anrede + " " + projects[i].BauHrAdrAnsprechpartner.Vorname + " " + projects[i].BauHrAdrAnsprechpartner.Nachname),
+                                new JProperty("email", projects[i].BauHrAdrAnsprechpartner.Email),
+                                new JProperty("phone", projects[i].BauHrAdrAnsprechpartner.Telefonnummer)));
+                                if (projects[i].BauHrAdrAnsprechpartner.TelefonnummerPrivat != "" || projects[i].BauHrAdrAnsprechpartner.EmailPrivat != "")
+                                {
+                                    contactPersons.Add(new JObject(
+                                    new JProperty("name", projects[i].BauHrAdrAnsprechpartner.Anrede + " " + projects[i].BauHrAdrAnsprechpartner.Vorname + " " + projects[i].BauHrAdrAnsprechpartner.Nachname + "(Privat)"),
+                                    new JProperty("email", projects[i].BauHrAdrAnsprechpartner.EmailPrivat),
+                                    new JProperty("phone", projects[i].BauHrAdrAnsprechpartner.TelefonnummerPrivat)));
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        contactPersons.Add(new JObject(
+                             new JProperty("name", projects[i].BauHrAdrAnrede + " " + projects[i].BauHrAdrVorname + " " + projects[i].BauHrAdrName),
+                             new JProperty("email", projects[i].BauHrAdrEmail),
+                             new JProperty("phone", projects[i].BauHrAdrTelNr)
+                            ));
+                    }
                     JObject json = new JObject(
                      new JProperty("name", projects[i].ProjBezeichnung),
                      new JProperty("orderNumber", projects[i].ProjNr),
                      new JProperty("street", projects[i].ProjAdrStrasse),
                      new JProperty("zipcode", projects[i].ProjAdrOrtPLZ),
                      new JProperty("city", projects[i].ProjAdrOrtOrt),
-                     new JProperty("contact",
-                      new JArray(
-                       new JObject(
-                        new JProperty("name", projects[i].BauHrAdrAnrede + " " + projects[i].BauHrAdrVorname + " " + projects[i].BauHrAdrName),
-                        new JProperty("email", projects[i].BauHrAdrEmail),
-                        new JProperty("phone", projects[i].BauHrAdrTelNr)
-                       )
-                      )
-                     )
+                     new JProperty("contact", contactPersons)
                     );
+
                     LogfileHandler.Log("Json Body: " + json.ToString());
 
                     if (apikey.Length != 0)
