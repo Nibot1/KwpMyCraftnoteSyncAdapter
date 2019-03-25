@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.IO;
 using System.Timers;
 using System.Windows.Forms;
 
@@ -11,18 +12,18 @@ namespace KwpMyCraftnoteProjectSyncAdapter
     {
         private static Version version = Version.Parse("1.0.0.0");
         private static System.Timers.Timer aTimer;
-        private static string fileName = "config.json";
         private static string host = "localhost";
         private static string username = "sa";
         private static string password = "kwpsarix";
         private static string database = "BNWINS";
         private static string instance = "kwp";
-        private static string lastSync = "";
+        private static string lastSync = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
         private static int limit = 10;
-        private static double interval = 10.0;
+        private static double interval = 5.0;
         private static string current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
         private static string apikey = "";
         private static string keyword = "craftnote";
+        private static string configfilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KwpMyCraftnoteSyncAdapter\\config.json");
         private static JObject config = new JObject();
         private static SqlConnection cnn;
         static void Main(string[] args)
@@ -36,18 +37,81 @@ namespace KwpMyCraftnoteProjectSyncAdapter
             //////////////////////////////////////////////////////
             /// Searches commandline args for a Configfilepath ///
             //////////////////////////////////////////////////////
-            if (args.Length != 0)
+            LogfileHandler.Log("Configfile: " + configfilePath);
+
+            if (!ConfigfileHandler.CheckIfConfigFileExists(configfilePath))
             {
-                fileName = args[0].ToString();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Dies ist der Erste start der Anwendung. Als ertses müssen wir noc ein paar sachen Wissen.");
+                Console.Write("Bitte Geben sie die IPAdresse des Computers mit dem Installierten Sqlservers an (localhost): ");
+                host = Console.ReadLine();
+                if (host.Length == 0)
+                {
+                    host = "localhost";
+                }
+                Console.Write("Bitte Geben sie jetzt die Sqlserver Instanz ein (kwp): ");
+                instance = Console.ReadLine();
+                if (instance.Length == 0)
+                {
+                    instance = "kwp";
+                }
+                Console.Write("Bitte Geben sie Jetzt die Start Datenbank ein (BNWINS): ");
+                database = Console.ReadLine();
+                if (database.Length == 0)
+                {
+                    database = "BNWINS";
+                }
+                Console.Write("Bitte geben sie jetz den Benutzernamen der Sqlserverinstanz ein (sa): ");
+                username = Console.ReadLine();
+                if (username.Length == 0)
+                {
+                    username = "sa";
+                }
+                Console.Write("Bitte geben sie jetzt das Passwort der Sqlserverinstanz ein (kwpsarix): ");
+                password = Console.ReadLine();
+                if (password.Length == 0)
+                {
+                    password = "kwpsarix";
+                }
+                Console.Write("Bitte geben sie jetzt den MyCraftnote API Schlüssel ein: ");
+                apikey = Console.ReadLine();
+                while (apikey == "")
+                {
+                    Console.Write("Der Api Schlüssel darf nicht leer sein. Bitte tragen sie hier ihren API Schlüssel ein: ");
+                    apikey = Console.ReadLine();
+                }
+                Console.Write("Bitte geben sie jetzt den Gewünschten aktualisierungs rythmus in minuten an (5): ");
+                string intervalString = Console.ReadLine();
+                if (intervalString.Length == 0)
+                {
+                    interval = 5.0;
+                }
+                else
+                {
+                    if (isDouble(intervalString))
+                    {
+                        interval = Double.Parse(intervalString);
+                    }
+                    else { 
+                        while (!isDouble(intervalString))
+                        {
+                            Console.Write("Die eingabe muss eine Zahl sein. Bitte geben sie jetzt den Gewünschten aktualisierungs rythmus in minuten an (5): ");
+                            intervalString = Console.ReadLine();
+                        }
+                        interval = Double.Parse(intervalString);
+                    }
+                }
+                config = new JObject(new JProperty("host", host), new JProperty("username", username), new JProperty("password", password), new JProperty("database", database), new JProperty("instance", instance), new JProperty("last_sync", current), new JProperty("limit", limit), new JProperty("apikey", apikey), new JProperty("interval", interval), new JProperty("keyword", keyword));
+                ConfigfileHandler.CreateConfigFile(configfilePath, config);
+                Console.WriteLine("Configuration Abgeschlossen. Die Konfigurationsdatei befindet sich hier: " + configfilePath);
             }
-            LogfileHandler.Log("Configfile: " + fileName);
 
             try
             {
                 //////////////////////////
                 /// Reading Configfile ///
                 //////////////////////////
-                config = ConfigfileHandler.ReadConfigfile(fileName);
+                config = ConfigfileHandler.ReadConfigfile(configfilePath);
                 LogfileHandler.Log("Configfile content: " + config.ToString());
 
                 ////////////////////////////////////
@@ -154,7 +218,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         private static void OnTimedEvent(Object source, ElapsedEventArgs e)
         {
             LogfileHandler.Log("Timer run");
-            runDBProcessing();                
+            runDBProcessing();
         }
 
         public static void runDBProcessing()
@@ -164,7 +228,7 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 //////////////////////////
                 /// Reading Configfile ///
                 //////////////////////////
-                config = ConfigfileHandler.ReadConfigfile(fileName);
+                config = ConfigfileHandler.ReadConfigfile(configfilePath);
                 LogfileHandler.Log("Configfile content: " + config.ToString());
 
 
@@ -227,7 +291,20 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                 }
             }
             ApiHandler.SendProjects(serviceProjects, apikey);
-            ConfigfileHandler.UpdateConfigfile(fileName, config, current);
+            ConfigfileHandler.UpdateConfigfile(configfilePath, config, current);
+        }
+
+        public static Boolean isDouble(string input)
+        {
+            try
+            {
+                Double.Parse(input);
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

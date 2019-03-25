@@ -9,18 +9,20 @@ namespace KwpMyCraftnoteProjectSyncAdapter
 {
     class LogfileHandler
     {
+        public static string logfilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KwpMyCraftnoteSyncAdapter\\log.txt");
         public static void Log(string msg)
         {
-            if (!File.Exists("log.txt"))
+            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KwpMyCraftnoteSyncAdapter\\"));
+            if (!File.Exists(logfilePath))
             {
-                File.WriteAllText("log.txt", string.Empty);
+                File.WriteAllText(logfilePath, string.Empty);
             }
-            if (new System.IO.FileInfo("log.txt").Length / 1000000 >= 1000)
+            if (new FileInfo(logfilePath).Length / 1000000 >= 1000)
             {
-                File.WriteAllText("log.txt", string.Empty);
+                File.WriteAllText(logfilePath, string.Empty);
             }
-            System.IO.StreamWriter sw = System.IO.File.AppendText(
-                "log.txt");
+            StreamWriter sw = File.AppendText(
+                logfilePath);
             try
             {
                 string logLine = System.String.Format(

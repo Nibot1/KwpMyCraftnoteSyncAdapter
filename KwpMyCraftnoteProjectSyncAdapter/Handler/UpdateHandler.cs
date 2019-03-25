@@ -9,20 +9,24 @@ namespace KwpMyCraftnoteProjectSyncAdapter
 {
     class UpdateHandler
     {
+        public static string filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KwpMyCraftnoteSyncAdapter\\update.json");
+        public static string filePathExe = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KwpMyCraftnoteSyncAdapter\\update.exe");
         public static void CheckUpdate(Version version)
         {
             try
             {
+                Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KwpMyCraftnoteSyncAdapter\\"));
+
                 Console.WriteLine("Prüfe auf aktualisierung");
                 WebClient myWebClient = new WebClient();
-                myWebClient.DownloadFile("https://server01.nibot.me/kwpcarftnote/update.json", "update.json");
+                myWebClient.DownloadFile("https://server01.nibot.me/kwpcraftnote/update.json", filePath);
 
-                if (File.Exists("update.json") && new FileInfo("update.json").Length != 0)
+                if (File.Exists(filePath) && new FileInfo(filePath).Length != 0)
                 {
                     /////////////////////////////////////////////////////////////////////////////
                     /// Open a StreamReader to read the filecontent an parse it to a JObject ///
                     ///////////////////////////////////////////////////////////////////////////
-                    using (StreamReader r = new StreamReader("update.json"))
+                    using (StreamReader r = new StreamReader(filePath))
                     {
                         string json = r.ReadToEnd();
                         JObject filecontent = JObject.Parse(json);
@@ -31,10 +35,10 @@ namespace KwpMyCraftnoteProjectSyncAdapter
                         if (version < newVersion)
                         {
                             Console.WriteLine("Update avilable");
-                            myWebClient.DownloadFile("https://server01.nibot.me/kwpcarftnote/update.exe", "update.exe");
-                            if (File.Exists("update.exe") && new FileInfo("update.exe").Length != 0)
+                            myWebClient.DownloadFile("https://server01.nibot.me/kwpcraftnote/update.exe", filePathExe);
+                            if (File.Exists(filePathExe) && new FileInfo(filePathExe).Length != 0)
                             {
-                                Process.Start("update.exe");
+                                Process.Start(Path.Combine(filePathExe+ " /SILENT"));
                                 LogfileHandler.Log("Update started");
                                 System.Environment.Exit(0);
                             }

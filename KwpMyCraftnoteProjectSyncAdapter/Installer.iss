@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "KwpMyCraftnoteProjectSyncAdapter"
-#define MyAppVersion "1.0.0.0"
+#define MyAppVersion "1.0.3.0"
 #define MyAppExeName "KwpMyCraftnoteProjectSyncAdapter.exe"
 
 [Setup]
@@ -15,20 +15,19 @@ AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
 DefaultDirName={pf}\KwpMyCraftnoteSyncAdapter
 DisableProgramGroupPage=yes
-OutputBaseFilename=setup
+OutputBaseFilename=update
 SetupIconFile=C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\icon.ico
 Compression=lzma
 SolidCompression=yes
-PrivilegesRequired=admin
 
 [Languages]
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 
 [Files]
 Source: "C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\bin\Release\net472\KwpMyCraftnoteProjectSyncAdapter.exe"; DestDir: "{app}";
-Source: "C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\bin\Release\net472\JSONRequest.Net.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\bin\Release\net472\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\bin\Release\net472\System.Net.Http.Formatting.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\bin\Release\net472\JSONRequest.Net.dll"; DestDir: "{app}";
+Source: "C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\bin\Release\net472\Newtonsoft.Json.dll"; DestDir: "{app}";
+Source: "C:\Development\KwpMyCraftnoteProjectSyncAdapter\KwpMyCraftnoteProjectSyncAdapter\bin\Release\net472\System.Net.Http.Formatting.dll"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -36,5 +35,5 @@ Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{commonstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec nowait postinstall skipifsilent runascurrentuser
 

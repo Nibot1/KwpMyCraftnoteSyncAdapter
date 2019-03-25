@@ -18,6 +18,76 @@ namespace KwpMyCraftnoteProjectSyncAdapter
         private static string current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
         private static string apikey = "";
         private static string keyword = "craftnote";
+
+
+        public static Boolean CheckIfConfigFileExists(String path)
+        {
+            /////////////////////////////////////////////////
+            /// Checking if file exists and is not empty ///
+            ///////////////////////////////////////////////
+            if (File.Exists(path) && new FileInfo(path).Length != 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public static void CreateConfigFile(String fileName, JObject config)
+        {
+            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "KwpMyCraftnoteSyncAdapter\\"));
+            try
+            {
+                ////////////////////////////////////
+                /// Read all values from JObject ///
+                /// and update all values        ///
+                ////////////////////////////////////
+                host = (string)config["host"];
+                username = (string)config["username"];
+                password = (string)config["password"];
+                database = (string)config["database"];
+                database = (string)config["database"];
+                instance = (string)config["instance"];
+                limit = (int)config["limit"];
+                interval = (double)config["interval"];
+                apikey = (string)config["apikey"];
+                keyword = (string)config["keyword"];
+                current = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss.fff");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error while processing the config file. Using fallback values. Please check the Configfile for any issues");
+                Console.WriteLine(e.ToString());
+                LogfileHandler.Log("Error in Configfile: " + e.ToString());
+            }
+
+            ////////////////////////////////////////////////////////////////////////////////
+            /// Rewriting Configfile to avoid malconfig and to update lastsync timestamp ///
+            ////////////////////////////////////////////////////////////////////////////////
+            File.WriteAllText(fileName, string.Empty);
+            ///////////////////////////////////////////////////
+            /// New JObject with updated Value for lastsync ///
+            ///////////////////////////////////////////////////
+            JObject json = new JObject(new JProperty("host", host), new JProperty("username", username), new JProperty("password", password), new JProperty("database", database), new JProperty("instance", instance), new JProperty("last_sync", current), new JProperty("limit", limit), new JProperty("apikey", apikey), new JProperty("interval", interval), new JProperty("keyword", keyword));
+            ////////////////////////////////////////////////////
+            /// Opening Filestream and write JObject to File ///
+            ////////////////////////////////////////////////////
+            using (FileStream fs = File.Create(fileName))
+            {
+                //////////////////////////////
+                /// JObject to Byte array ///
+                ////////////////////////////
+                Byte[] contents = new UTF8Encoding(true).GetBytes(json.ToString());
+
+                ///////////////////////////////////
+                /// Writing Byte array to File ///
+                /////////////////////////////////
+                fs.Write(contents, 0, contents.Length);
+                Console.WriteLine("Configfile successfuly updated");
+                LogfileHandler.Log("Configfile updated");
+            }
+        }
         public static void UpdateConfigfile(String fileName, JObject config, String currentTime)
         {
             try
